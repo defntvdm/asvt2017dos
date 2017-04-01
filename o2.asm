@@ -2,10 +2,10 @@
 	.code
 	org 	100h
 start:
-	mov 	al, 40h
+	xor 	ax, ax
 	mov 	es, ax
-	mov 	ax, es:[49h]
-	mov 	di, es:[4eh]
+	mov 	ax, es:[449h]
+	mov 	di, es:[44eh]
 	mov 	ah, 1eh
 	mov 	bh, 0b8h
 	cmp 	al, 4
