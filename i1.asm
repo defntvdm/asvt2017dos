@@ -24,25 +24,35 @@ lala proc
 	in  	al, 60h
 	test 	al, 10000000b
 	jnz  	unpressed
-	mov 	cl, byte ptr was_pressed
-	cmp 	cl, 0
-	mov 	cl, 1
-	mov 	byte ptr was_pressed, cl
+	mov 	cl, al
+	mov 	bx, offset my_flags
+	xlat
+	cmp 	al, 0
+	pushf
+	mov 	al, 1
+	add 	bx, cx
+	mov 	byte ptr [bx], al
+	popf
 	je  	shprnt
-	mov 	cl, 0
-	mov 	byte ptr should_prnt, cl
+	mov 	al, 0
+	mov 	byte ptr should_prnt, al
 	iret
-	
 	shprnt:
-		mov 	cl, 1
-		mov 	byte ptr should_prnt, cl
+		mov 	al, 1
+		mov 	byte ptr should_prnt, al
 		iret
 	unpressed:
+		mov 	ah, 0
+		and 	al, 01111111b
+		mov 	bx, offset my_flags
+		add 	bx, ax
+		mov 	al, 0
+		mov 	byte ptr [bx], al
 		mov 	al, 0
 		mov 	byte ptr should_prnt, al
-		mov 	byte ptr was_pressed, al
 		iret
 	old_vect 	dd 	?
+	my_flags 	db 	127 dup (0)
 lala endp
 start:
 	mov 	ah, 0
@@ -85,6 +95,8 @@ prnt_symb proc
 		mov 	ah, 02h
 		int 	21h
 		loop 	prnt
+	mov 	dl, 'h'
+	int 	21h
 	mov 	dl, 10
 	int 	21h
 	pop 	cx
