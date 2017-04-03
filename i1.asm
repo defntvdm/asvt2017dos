@@ -22,27 +22,34 @@ lala proc
 	pushf
 	call 	dword ptr old_vect
 	in  	al, 60h
-	cmp 	al, 128
-	jg  	pressed
-	mov 	ch, 0
+	test 	al, 10000000b
+	jnz  	unpressed
+	mov 	cl, byte ptr was_pressed
+	cmp 	cl, 0
+	mov 	cl, 1
+	mov 	byte ptr was_pressed, cl
+	je  	shprnt
 	mov 	cl, 0
+	mov 	byte ptr should_prnt, cl
 	iret
-	pressed:
-		call 	prnt_symb
-		cmp 	ch, 0
-		mov 	ch, 1
-		mov 	cl, 0
-		iret
-	ok:
+	
+	shprnt:
 		mov 	cl, 1
+		mov 	byte ptr should_prnt, cl
+		iret
+	unpressed:
+		mov 	al, 0
+		mov 	byte ptr should_prnt, al
+		mov 	byte ptr was_pressed, al
 		iret
 	old_vect 	dd 	?
 lala endp
 start:
 	mov 	ah, 0
 	int 	16h
+	mov 	cl, byte ptr should_prnt
 	cmp 	cl, 1
-	je  	start
+	jne  	start
 	cmp 	al, 27
 	pushf
 	call 	prnt_symb
@@ -55,6 +62,8 @@ start:
 	movsw
 	movsw
 	ret
+	was_pressed 	db 	0
+	should_prnt 	db 	0
 prnt_symb proc
 	push 	ax
 	push 	cx
