@@ -55,6 +55,7 @@ lala proc
 	my_flags 	db 	127 dup (0)
 lala endp
 start:
+	hlt
 	mov 	ah, 0
 	int 	16h
 	mov 	cl, byte ptr should_prnt
