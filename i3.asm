@@ -7,32 +7,32 @@ start:
 	inc 	di
 	jmp 	M
 
-frequencies 	dw 	10h, 1540
-				dw	03h, 1467
-				dw	11h, 1393
-				dw	04h, 1320
-				dw	12h, 1247
-				dw	13h, 1173
-				dw	06h, 1100
-				dw	14h, 1027
-				dw	07h, 953
-				dw	15h, 880
-				dw	08h, 843
-				dw	16h, 807
-				dw	17h, 770
-				dw	2ch, 770
-				dw	1fh, 733
-				dw	2dh, 697
-				dw	20h, 660
-				dw	2eh, 623
-				dw	2fh, 587
-				dw	22h, 550
-				dw	30h, 513
-				dw	23h, 477
-				dw	31h, 440
-				dw	24h, 422
-				dw	32h, 403
-				dw	33h, 385
+frequencies 	dw 	10h, 9121
+				dw	03h, 8609
+				dw	11h, 8126
+				dw	04h, 7670
+				dw	12h, 7239
+				dw	13h, 6833
+				dw	06h, 6449
+				dw	14h, 6087
+				dw	07h, 5746
+				dw	15h, 5423
+				dw	08h, 5119
+				dw	16h, 4831
+				dw	17h, 4560
+				dw	2ch, 4560
+				dw	1fh, 4304
+				dw	2dh, 4063
+				dw	20h, 3834
+				dw	2eh, 3619
+				dw	2fh, 3416
+				dw	22h, 3224
+				dw	30h, 3043
+				dw	23h, 2873
+				dw	31h, 2711
+				dw	24h, 2559
+				dw	32h, 2415
+				dw	33h, 2280
 
 old_vect 		dw 	?, ?
 
@@ -86,7 +86,7 @@ the_same:
 	in 		al, 61h
 	and 	al, 0fdh
 	out 	61h, al
-	mov 	al, 10110110b
+	mov 	al, 0b6h
 	out 	43h, al
 	lodsw
 	out 	42h, al
