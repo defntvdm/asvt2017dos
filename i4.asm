@@ -319,11 +319,11 @@ main:
 	shl 	bx, 1
 	add 	bx, offset melodies
 	mov 	si, cs:bx
-	mov 	al, es:46ch
-	add 	al, 10
-	llloop:
-		cmp 	al, byte ptr es:46ch
-		jne 	llloop
+	;mov 	al, es:46ch
+	;add 	al, 10
+	;llloop:
+	;	cmp 	al, byte ptr es:46ch
+	;	jne 	llloop
 	call 	make_music
 	jmp 	main
 	ret
