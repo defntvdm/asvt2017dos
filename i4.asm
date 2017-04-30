@@ -379,7 +379,8 @@ int9hhandler proc
 	mov 	al, 20h
 	out 	20h, al
 	pop 	ax
-	and 	al, 7fh
+	test 	al, 80h
+	jnz 	unpressed
 	cmp 	al, 39h
 	je 		stop_play
 	cmp 	al, 6
@@ -388,12 +389,32 @@ int9hhandler proc
 	je 		exit
 	dec 	ax
 	dec 	ax
+	mov 	ah, 0
+	mov 	bx, offset flags
+	add 	bx, ax
+	mov 	cl, 1
+	cmp 	byte ptr cs:bx, cl
+	je 		ooops
+	mov 	byte ptr cs:bx, cl
 	mov 	cs:[offset song_num], al
 	mov 	byte ptr cs:[offset new_song], 1
 	pop 	ax
 	iret
 ooops:
 	mov 	byte ptr cs:[offset new_song], 0
+	pop 	ax
+	iret
+unpressed:
+	and 	al, 7fh
+	cmp 	al, 6
+	jg 		ooops
+	dec 	ax
+	dec 	ax
+	mov 	bx, offset flags
+	mov 	ah, 0
+	add 	bx, ax
+	mov 	cl, 0
+	mov 	byte ptr cs:bx, cl
 	pop 	ax
 	iret
 stop_play:
@@ -410,5 +431,6 @@ exit:
 	mov 	ax, 2509h
 	int 	21h
 	int 	20h
+flags 	db 	5 dup (0)
 int9hhandler endp
 end start
