@@ -5,15 +5,55 @@
 start:
 	jmp 	M
 
+wall 		equ 28
 port1 		equ 1
 port2 		equ 0eh
-cfood 		equ 82
+cfood 		equ 52
 csnake1 	equ 2
 chsnake1 	equ 10
 csnake2 	equ 4
 chsnake2 	equ 12
 ttime 		equ	2
-field 		db 	2560 dup (0)
+field 		db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	0, 0, 0, port1, 56 dup (0), port2, 0, 0, 0
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	9 dup (0), 4 dup (wall), 11 dup (0), 16 dup (wall), 11 dup (0), 4 dup (wall), 9 dup (0)
+			db 	9 dup (0), 4 dup (wall), 11 dup (0), 16 dup (wall), 11 dup (0), 4 dup (wall), 9 dup (0)
+			db 	9 dup (0), 2 dup (wall), 13 dup (0), 16 dup (wall), 13 dup (0), 2 dup (wall), 9 dup (0)
+			db 	9 dup (0), 2 dup (wall), 42 dup (0), 2 dup (wall), 9 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	9 dup (0), 2 dup (wall), 42 dup (0), 2 dup (wall), 9 dup (0)
+			db 	9 dup (0), 2 dup (wall), 13 dup (0), 16 dup (wall), 13 dup (0), 2 dup (wall), 9 dup (0)
+			db 	9 dup (0), 4 dup (wall), 11 dup (0), 16 dup (wall), 11 dup (0), 4 dup (wall), 9 dup (0)
+			db 	9 dup (0), 4 dup (wall), 11 dup (0), 16 dup (wall), 11 dup (0), 4 dup (wall), 9 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	0, 0, 0, port2, 56 dup (0), port1, 0, 0, 0
+			db 	64 dup (0)
+			db 	64 dup (0)
+			db 	64 dup (0)
 dir_vars 	dw 	11h, next_dir1, -100h
 			dw 	1eh, next_dir1, -1h
 			dw 	1fh, next_dir1, 100h
@@ -23,7 +63,10 @@ dir_vars 	dw 	11h, next_dir1, -100h
 			dw 	50h, next_dir2, 100h
 			dw 	4dh, next_dir2, 1h
 old_mode 	db 	?
-msg 		db 	'Сколько игроков? [1/2] : $'
+msg 		db 	'Серый - стенка. НЕ ВРЕЗАТЬСЯ!!!', 13, 10
+			db 	'Бирюзовый - еда. КУШАТЬ!!!', 13, 10
+			db 	'Зелёный, красный - змейки. УБИТЬ!!! (зелёную, если вы красный и наоборот)', 13, 10
+			db	'Сколько игроков? [1/2] : $'
 players 	db 	?
 old_seg9 	dw 	?
 old_off9 	dw 	?
@@ -46,11 +89,12 @@ stail2 		dw 	offset snake2
 curr_proc 	db 	1
 need_tail 	db 	0
 tics 		db 	ttime
-ports_dir 	dw 	203h, 263ch, 302h, 253dh, 403h, 243ch, 304h, 253bh
- 			dw 	243ch, 403h, 253bh, 304h, 263ch, 203h, 253dh, 302h
- 			dw 	23ch, 2603h, 33bh, 2504h, 43ch, 2403h, 33dh, 2502h
- 			dw 	2403h, 43ch, 2502h, 33dh, 2603h, 23ch, 2504h, 33bh
+ports_dir 	dw 	203h, 253ch, 302h, 243dh, 403h, 233ch, 304h, 243bh
+ 			dw 	233ch, 403h, 243bh, 304h, 253ch, 203h, 243dh, 302h
+ 			dw 	23ch, 2503h, 33bh, 2404h, 43ch, 2303h, 33dh, 2402h
+ 			dw 	2303h, 43ch, 2402h, 33dh, 2503h, 23ch, 2404h, 33bh
 prev_pos 	dw 	?
+need_play 	db 	0
 
 M:
 	mov 	ah, 0fh
@@ -91,6 +135,19 @@ readed:
 	mov 	ax, 13h
 	int 	10h
 
+	xor 	dx, dx
+h:
+	mov 	dl, 0
+	w:
+		call 	get_value
+		call 	write_cell
+		add 	dl, 1
+		cmp 	dl, 64
+		jne 	w
+	add 	dh, 1
+	cmp 	dh, 40
+	jne 	h
+
 	mov 	dx, 1301h
 	mov 	al, csnake1
 	call	set_num
@@ -111,16 +168,6 @@ readed:
 	mov 	al, chsnake2
 	call 	set_num
 no_second:
-	mov 	dx, 303h
-	mov 	al, port1
-	call 	set_num
-	mov 	dx, 253ch
-	call 	set_num
-	mov 	dx, 33ch
-	mov 	al, port2
-	call 	set_num
-	mov 	dx, 2503h
-	call 	set_num
 	call 	set_food
 main_loop:
 	call 	move_snake1
@@ -128,8 +175,24 @@ main_loop:
 	jne 	ssleep
 	call 	move_snake2
 ssleep:
+	cmp 	[need_play], 1
+	jne 	neednt_play
+	mov 	al, 0b6h
+	out 	43h, al
+	mov 	ax, 8609
+	out 	42h, al
+	mov 	al, ah
+	out 	42h, al
+	in 		al, 61h
+	or 		al, 3
+	out 	61h, al
+neednt_play:
 	cmp 	[tics], 0
-	jne 	ssleep
+	jg 		neednt_play
+	mov 	[need_play], 0
+	in 		al, 61h
+	and 	al, 0fdh
+	out 	61h, al
 	mov 	[tics], ttime
 	cmp 	[exit_flag], 0
 	jne 	exit_program
@@ -277,9 +340,9 @@ get_new_dx proc
 	je 		in_port
 	cmp 	dx, 33ch
 	je 		in_port
-	cmp 	dx, 2503h
+	cmp 	dx, 2403h
 	je 		in_port
-	cmp 	dx, 253ch
+	cmp 	dx, 243ch
 	je 		in_port
 	jmp 	check_cell
 in_port:
@@ -313,6 +376,8 @@ check_cell:
 	call 	get_value
 	cmp 	al, cfood
 	je 		set_need_tail
+	cmp 	al, wall
+	je 		lose
 	cmp 	al, csnake1
 	je 		lose
 	cmp 	al, csnake2
@@ -325,7 +390,7 @@ check_cell:
 	ret
 set_need_tail:
 	call 	set_food
-	call 	play_sound
+	mov 	[need_play], 1
 	mov 	[need_tail], 1
 	pop 	ax
  	ret
@@ -346,7 +411,21 @@ no_lose:
 get_new_dx endp
 
 play_sound proc
-	
+	push 	ax
+	mov 	al, 0b6h
+	out 	43h, al
+	mov 	ax, 4560
+	out 	42, al
+	mov 	al, ah
+	out 	42, al
+	in 		al, 61h
+	or 		al, 3
+	out 	61h, al
+	hlt
+	in 		al, 61h
+	and 	al, 0fdh
+	out 	61h, al
+	pop 	ax
 	ret
 play_sound endp
 
