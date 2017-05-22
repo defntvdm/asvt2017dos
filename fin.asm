@@ -1,5 +1,6 @@
 	model 	tiny
 	.code
+	.386
 	org 	100h
 	locals
 start:
@@ -9,11 +10,54 @@ wall 		equ 28
 port1 		equ 1
 port2 		equ 0eh
 cfood 		equ 52
+cboost 		equ 34
 csnake1 	equ 2
 chsnake1 	equ 10
 csnake2 	equ 4
 chsnake2 	equ 12
 ttime 		equ	2
+green_lose 	db 	26 dup(0)
+			db 	0, 4 dup(csnake2), 0, 4 dup(csnake2), 0, 4 dup(csnake2), 0, 4 dup(csnake2), 0, csnake2, 2 dup(0), csnake2, 0
+			db 	0, csnake2, 4 dup(0), csnake2, 2 dup(0), csnake2, 0, csnake2, 4 dup(0), csnake2, 4 dup(0), 2 dup(csnake2), 0, csnake2, 0
+			db 	0, csnake2, 0, 2 dup(csnake2), 0, 4 dup(csnake2), 0, 4 dup(csnake2), 0, 4 dup(csnake2), 0, 4 dup(csnake2), 0
+			db 	0, csnake2, 2 dup(0), csnake2, 0, 2 dup(csnake2), 3 dup(0), csnake2, 4 dup(0), csnake2, 4 dup(0), csnake2, 0, 2 dup(csnake2), 0
+			db 	0, 4 dup(csnake2), 0, csnake2, 0, 2 dup(csnake2), 0, 4 dup(csnake2), 0, 4 dup(csnake2), 0, csnake2, 2 dup(0), csnake2, 0
+			db 	26 dup(0)
+			db 	4 dup(0), csnake2, 4 dup(0), 4 dup(csnake2), 0, 4 dup(csnake2), 0, 4 dup(csnake2), 3 dup(0)
+			db 	4 dup(0), csnake2, 4 dup(0), csnake2, 2 dup(0), csnake2, 0, csnake2, 4 dup(0), csnake2, 6 dup(0)
+			db 	4 dup(0), csnake2, 4 dup(0), csnake2, 2 dup(0), csnake2, 0, 4 dup(csnake2), 0, 4 dup(csnake2), 3 dup(0)
+			db 	4 dup(0), csnake2, 4 dup(0), csnake2, 2 dup(0), csnake2, 4 dup(0), csnake2, 0, csnake2, 6 dup(0)
+			db 	4 dup(0), 4 dup(csnake2), 0, 4 dup(csnake2), 0, 4 dup(csnake2), 0, 4 dup(csnake2), 3 dup(0)
+			db 	26 dup(0)
+			
+red_lose 	db 	26 dup(0)
+			db 	6 dup(0), 4 dup(csnake1), 0, 4 dup(csnake1), 0, 2 dup(csnake1), 8 dup(0)
+			db 	6 dup(0), csnake1, 2 dup(0), csnake1, 0, csnake1, 4 dup(0), csnake1, 0, csnake1, 7 dup(0)
+			db 	6 dup(0), 4 dup(csnake1), 0, 4 dup(csnake1), 0, csnake1, 2 dup(0), csnake1, 6 dup(0)
+			db 	6 dup(0), 2 dup(csnake1), 3 dup(0), csnake1, 4 dup(0), csnake1, 2 dup(0), csnake1, 6 dup(0)
+			db 	6 dup(0), csnake1, 0, 2 dup(csnake1), 0, 4 dup(csnake1), 0, 3 dup(csnake1), 7 dup(0)
+			db 	26 dup(0)
+			db 	4 dup(0), csnake1, 4 dup(0), 4 dup(csnake1), 0, 4 dup(csnake1), 0, 4 dup(csnake1), 3 dup(0)
+			db 	4 dup(0), csnake1, 4 dup(0), csnake1, 2 dup(0), csnake1, 0, csnake1, 4 dup(0), csnake1, 6 dup(0)
+			db 	4 dup(0), csnake1, 4 dup(0), csnake1, 2 dup(0), csnake1, 0, 4 dup(csnake1), 0, 4 dup(csnake1), 3 dup(0)
+			db 	4 dup(0), csnake1, 4 dup(0), csnake1, 2 dup(0), csnake1, 4 dup(0), csnake1, 0, csnake1, 6 dup(0)
+			db  4 dup(0), 4 dup(csnake1), 0, 4 dup(csnake1), 0, 4 dup(csnake1), 0, 4 dup(csnake1), 3 dup(0)
+			db 	26 dup(0)
+standoff 	db 	26 dup(0)
+			db 	0, 4 dup(cfood), 0, 4 dup(cfood), 2 dup(0), 2 dup(cfood), 2 dup(0), cfood, 2 dup(0), cfood, 0, 2 dup(cfood), 3 dup(0)
+			db 	0, cfood, 5 dup(0), 2 dup(cfood), 2 dup(0), cfood, 2 dup(0), cfood, 0, 2 dup(cfood), 0, cfood, 0, cfood, 0, cfood, 2 dup(0)
+			db 	0, 4 dup(cfood), 2 dup(0), 2 dup(cfood), 2 dup(0), 4 dup(cfood), 0, 4 dup(cfood), 0, cfood, 2 dup(0), cfood, 0
+			db 	4 dup(0), cfood, 2 dup(0), 2 dup(cfood), 2 dup(0), cfood, 2 dup(0), cfood, 0, cfood, 0, 2 dup(cfood), 0, cfood, 2 dup(0), cfood, 0
+			db 	0, 4 dup(cfood), 2 dup(0), 2 dup(cfood), 2 dup(0), cfood, 2 dup(0), cfood, 0, cfood, 2 dup(0), cfood, 0, 3 dup(cfood), 2 dup(0)
+			db 	26 dup(0)
+			db 	6 dup(0), 4 dup(cfood), 0, 4 dup(cfood), 0, 4 dup(cfood), 6 dup(0)
+			db 	6 dup(0), cfood, 2 dup(0), cfood, 0, cfood, 4 dup(0), cfood, 9 dup(0)
+			db 	6 dup(0), cfood, 2 dup(0), cfood, 0, 4 dup(cfood), 0, 4 dup(cfood), 6 dup(0)
+			db 	6 dup(0), cfood, 2 dup(0), cfood, 0, cfood, 4 dup(0), cfood, 9 dup(0)
+			db 	6 dup(0), 4 dup(cfood), 0, cfood, 4 dup(0), cfood, 9 dup(0)
+			db 	26 dup(0)
+
+
 field 		db 	64 dup (0)
 			db 	64 dup (0)
 			db 	64 dup (0)
@@ -95,6 +139,8 @@ ports_dir 	dw 	203h, 253ch, 302h, 243dh, 403h, 233ch, 304h, 243bh
  			dw 	2303h, 43ch, 2402h, 33dh, 2503h, 23ch, 2404h, 33bh
 prev_pos 	dw 	?
 need_play 	db 	0
+boost1 		db 	0
+boost2 		db 	0
 
 M:
 	mov 	ah, 0fh
@@ -171,8 +217,17 @@ no_second:
 	call 	set_food
 main_loop:
 	call 	move_snake1
+	cmp 	[boost1], 0
+	je 		no_bst1
+	sub 	[boost1], 1
+	call 	move_snake1
+no_bst1:
 	cmp 	[players], 2
 	jne 	ssleep
+	call 	move_snake2
+	cmp 	[boost2], 0
+	je 		ssleep
+	sub 	[boost2], 1
 	call 	move_snake2
 ssleep:
 	cmp 	[need_play], 1
@@ -211,6 +266,78 @@ exit_program:
 	int 	21h
 	push 	cs
 	pop 	ds
+	cmp 	[exit_flag], 3
+	je 		exitexit
+	cmp 	[exit_flag], 1
+	je 		looooose1
+	cmp 	[exit_flag], 2
+	je 		looooose2
+	cmp 	[exit_flag], 4
+	je 		tie
+	jmp 	exitexit
+tie:
+	mov 	si, offset standoff
+	mov 	dx, 0d13h
+	mov 	ch, 0
+llloop3:
+	mov 	cl, 0
+	lloop3:
+		lodsb
+		push 	dx
+		push 	cx
+		add 	dx, cx
+		call 	set_num
+		pop 	cx
+		pop 	dx
+		add 	cl, 1
+		cmp 	cl, 26
+		jne 	lloop3
+	add 	ch, 1
+	cmp 	ch, 13
+	jne 	llloop3
+	jmp 	exitexit
+looooose2:
+	mov 	si, offset red_lose
+	mov 	dx, 0d13h
+	mov 	ch, 0
+llloop2:
+	mov 	cl, 0
+	lloop2:
+		lodsb
+		push 	dx
+		push 	cx
+		add 	dx, cx
+		call 	set_num
+		pop 	cx
+		pop 	dx
+		add 	cl, 1
+		cmp 	cl, 26
+		jne 	lloop2
+	add 	ch, 1
+	cmp 	ch, 13
+	jne 	llloop2
+	jmp 	exitexit
+looooose1:
+	mov 	si, offset green_lose
+	mov 	dx, 0d13h
+	mov 	ch, 0
+llloop1:
+	mov 	cl, 0
+	lloop1:
+		lodsb
+		push 	dx
+		push 	cx
+		add 	dx, cx
+		call 	set_num
+		pop 	cx
+		pop 	dx
+		add 	cl, 1
+		cmp 	cl, 26
+		jne 	lloop1
+	add 	ch, 1
+	cmp 	ch, 13
+	jne 	llloop1
+exitexit:
 	xor 	ax, ax
 	int 	16h
 	xor 	ax, ax
@@ -319,11 +446,24 @@ set_food proc
 	call 	get_value
 	cmp 	al, 0
 	jne 	@@1
+	
+	cmp 	[counter], 4
+	jne 	no_boost
+	mov 	[counter], 0
+	mov 	al, cboost
+	call 	set_num
+	pop 	dx
+	pop 	ax
+	ret
+
+no_boost:
+	add 	[counter], 1
 	mov 	al, cfood
 	call 	set_num
 	pop 	dx
 	pop 	ax
 	ret
+	counter 	db 	0
 set_food endp
 
 get_new_dx proc
@@ -376,6 +516,8 @@ check_cell:
 	call 	get_value
 	cmp 	al, cfood
 	je 		set_need_tail
+	cmp 	al, cboost
+	je 		need_boost
 	cmp 	al, wall
 	je 		lose
 	cmp 	al, csnake1
@@ -388,6 +530,13 @@ check_cell:
 	je 		no_lose
 	pop 	ax
 	ret
+need_boost:
+	cmp 	[curr_proc], 1
+	je 		bst1
+	mov 	[boost2], 20
+	jmp 	set_need_tail
+bst1:
+	mov 	[boost1], 20
 set_need_tail:
 	call 	set_food
 	mov 	[need_play], 1
@@ -409,25 +558,6 @@ no_lose:
 	pop 	ax
 	ret
 get_new_dx endp
-
-play_sound proc
-	push 	ax
-	mov 	al, 0b6h
-	out 	43h, al
-	mov 	ax, 4560
-	out 	42, al
-	mov 	al, ah
-	out 	42, al
-	in 		al, 61h
-	or 		al, 3
-	out 	61h, al
-	hlt
-	in 		al, 61h
-	and 	al, 0fdh
-	out 	61h, al
-	pop 	ax
-	ret
-play_sound endp
 
 get_value proc
 	push 	dx
