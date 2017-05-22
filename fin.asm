@@ -6,6 +6,10 @@
 start:
 	jmp 	M
 
+leftside 	equ -1
+rightside 	equ 64
+topside 	equ -1
+botside	 	equ	40
 wall 		equ 28
 port1 		equ 1
 port2 		equ 0eh
@@ -56,7 +60,6 @@ standoff 	db 	26 dup(0)
 			db 	6 dup(0), cfood, 2 dup(0), cfood, 0, cfood, 4 dup(0), cfood, 9 dup(0)
 			db 	6 dup(0), 4 dup(cfood), 0, cfood, 4 dup(0), cfood, 9 dup(0)
 			db 	26 dup(0)
-
 
 field 		db 	64 dup (0)
 			db 	64 dup (0)
@@ -160,23 +163,32 @@ option:
 readed:
 	sub 	al, 30h
 	mov 	[players], al
-	mov 	ax, 3509h
-	int 	21h
-	mov 	[old_seg9], es
-	mov 	[old_off9], bx
-	mov 	dx, offset int9handler
-	mov 	ax, 2509h
-	int 	21h
-	mov 	ax, 351ch
-	int 	21h
-	mov 	[old_seg1c], es
-	mov 	[old_off1c], bx
-	mov 	ax, 251ch
-	mov 	dx, offset int1chandler
-	int 	21h
-
-	push 	cs
+	
+	cli
+	push 	es
+	xor 	ax, ax
+	mov 	es, ax
+	mov 	ax, es:[9h*4]
+	mov 	[old_off9], ax
+	mov 	ax, es:[9h*4 + 2]
+	mov 	[old_seg9], ax
+	mov 	ax, offset int9handler
+	mov 	es:[9h*4], ax
+	push 	ds
+	pop 	ax
+	mov 	es:[9h*4 + 2], ax
+	
+	mov 	ax, es:[1ch*4]
+	mov 	[old_off1c], ax
+	mov 	ax, es:[1ch*4 + 2]
+	mov 	[old_seg1c], ax
+	mov 	ax, offset int1chandler
+	mov 	es:[1ch*4], ax
+	push 	ds
+	pop 	ax
+	mov 	es:[1ch*4 + 2], ax
 	pop 	es
+	sti
 
 	mov 	ax, 13h
 	int 	10h
@@ -341,6 +353,10 @@ exitexit:
 	xor 	ax, ax
 	int 	16h
 	xor 	ax, ax
+	int 	16h
+	xor 	ax, ax
+	int 	16h
+	xor 	ax, ax
 	mov 	al, [old_mode]
 	int 	10h
 	ret
@@ -468,13 +484,13 @@ set_food endp
 
 get_new_dx proc
 	push 	ax
-	cmp 	dl, -1
+	cmp 	dl, leftside
 	je 		@@3
-	cmp 	dl, 64
+	cmp 	dl, rightside
 	je 		@@4
-	cmp 	dh, -1
+	cmp 	dh, topside
 	je 		@@1
-	cmp 	dh, 40
+	cmp 	dh, botside
 	je 		@@2
 	cmp 	dx, 303h
 	je 		in_port
@@ -533,10 +549,10 @@ check_cell:
 need_boost:
 	cmp 	[curr_proc], 1
 	je 		bst1
-	mov 	[boost2], 20
+	mov 	[boost2], 30
 	jmp 	set_need_tail
 bst1:
-	mov 	[boost1], 20
+	mov 	[boost1], 30
 set_need_tail:
 	call 	set_food
 	mov 	[need_play], 1
