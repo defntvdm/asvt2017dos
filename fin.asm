@@ -246,7 +246,7 @@ ssleep:
 	jne 	neednt_play
 	mov 	al, 0b6h
 	out 	43h, al
-	mov 	ax, 8609
+	mov 	ax, 4560
 	out 	42h, al
 	mov 	al, ah
 	out 	42h, al
@@ -516,11 +516,38 @@ in_port:
 	mov 	dx, ax
 	jmp 	check_cell
 @@4:
-	mov 	dl, 0
+	cmp 	[curr_proc], 1
+	je 		rotate_first1
+	mov 	[direction2], -1
+	mov 	[next_dir2], -1
+	jmp 	cont_dx1
+rotate_first1:
+	mov 	[direction1], -1
+	mov 	[next_dir1], -1
+cont_dx1:
+	mov 	dl, 63
+	sub 	dh, 1
+	cmp 	dh, -1
+	jne 	ddone1
+	mov 	dh, 39
+ddone1:
 	jmp 	check_cell
 @@3:
-	mov 	dl, 63
-	add 	dh, 1
+	cmp 	[curr_proc], 1
+	je 		rotate_first
+	mov 	[direction2], 1
+	mov 	[next_dir2], 1
+	jmp 	cont_dx
+rotate_first:
+	mov 	[direction1], 1
+	mov 	[next_dir1], 1
+cont_dx:
+	mov 	dl, 0
+	add 	dh, 2
+	cmp 	dh, 40
+	jne 	ddone
+	mov 	dh, 0
+ddone:
 	jmp 	check_cell
 @@2:
 	mov 	dh, 0
